@@ -1,0 +1,22 @@
+{
+  "type": "privileged",
+  "version": "1.0",
+  "name": "In-App-Payments-TEST",
+  "origin": "app://my-app.com",
+  "description": "In-App-Payments-TEST",
+  "developer": {
+    "name": "Andrei"
+  },
+  "icons": {
+    "256": "/icons/256.png"
+  },
+  "launch_path": "/index.html",
+  "installs_allowed_from": [
+    "*"
+  ],
+  "permissions": {
+    "systemXHR": {
+      "description": "Required to access payment API"
+    }
+  }
+}

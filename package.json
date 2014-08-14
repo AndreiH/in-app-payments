@@ -1,0 +1,8 @@
+{
+    "name": "in-app-payments",
+    "version": "1.0",
+    "dependencies": {
+        "mozpay": "0.0.3",
+        "express": "~3.3.1"
+    }
+}
