@@ -8,7 +8,7 @@
     //
     // Disallow receipts belonging to other apps.
     allowAnyAppReceipt: false,
-    apiUrlBase: 'https://marketplace.firefox.com',
+    apiUrlBase: 'https://marketplace-dev.allizom.org',
     apiVersionPrefix: '/api/v1',
     // When truthy, this will override the API object's default.
     apiTimeoutMs: null,
@@ -23,7 +23,7 @@
       warn: function() {},
     },
     // Only these receipt check services are allowed.
-    receiptCheckSites: ['https://receiptcheck.marketplace.firefox.com'],
+    receiptCheckSites: ['https://receiptcheck-dev.allizom.org'],
 
     // Private settings.
     //
