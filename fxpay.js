@@ -1,6 +1,9 @@
 (function(exports) {
   "use strict";
 
+  var pkgInfo = {"version": "0.0.3"};  // this is updated by `grunt bump`
+  exports.__version__ = pkgInfo.version;
+
   var settings;
   var defaultSettings = {
 
@@ -12,6 +15,7 @@
     apiVersionPrefix: '/api/v1',
     // When truthy, this will override the API object's default.
     apiTimeoutMs: null,
+    // When true, work with fake products and test receipts.
     fakeProducts: false,
     // This object is used for all logging.
     log: window.console || {
@@ -24,10 +28,8 @@
     },
     // Only these receipt check services are allowed.
     receiptCheckSites: [
-      'https://receiptcheck-dev.allizom.org',
-      'https://marketplace-dev.allizom.org',
-      'https://receiptcheck-payments-alt.allizom.org',
-      'https://payments-alt.allizom.org'
+      'https://receiptcheck.marketplace.firefox.com',
+      'https://marketplace.firefox.com'
     ],
 
     // Private settings.
@@ -40,6 +42,7 @@
       throw err;
     },
     oninit: function() {
+      settings.log.info('fxpay version:', exports.__version__);
       settings.log.info('initialization ran successfully');
     },
     onrestore: function(error, info) {
@@ -59,6 +62,9 @@
     mozApps: navigator.mozApps || null,
   };
 
+  //
+  // publicly exported functions:
+  //
 
   exports.configure = function _configure(newSettings, opt) {
     opt = opt || {};
@@ -106,6 +112,13 @@
         settings.log.error('falsey app object from getSelf()',
                            settings.appSelf);
         return storeError('NOT_INSTALLED_AS_APP');
+      }
+
+      var permissions = settings.appSelf.manifest.permissions;
+      if (!permissions || !permissions.systemXHR) {
+        settings.log.error('incorrect manifest permissions',
+                           settings.appSelf.manifest);
+        return storeError('MISSING_XHR_PERMISSION');
       }
 
       settings.hasAddReceipt = !!settings.appSelf.addReceipt;
@@ -241,7 +254,6 @@
       if (err) {
         return onRestore(err, productInfo);
       }
-      var origin = encodeURIComponent(settings.appSelf.origin);
       // The issuer of the receipt is the site of the Marketplace.
       // This is the site we want to use for making API requests.
       var apiUrlBase = data.iss;
@@ -259,26 +271,16 @@
         if (verifyResult.status === 'ok') {
           settings.log.info('validated receipt for', productInfo);
 
-          var url;
-          if (data.typ === 'test-receipt') {
-            url = ('/payments/stub-in-app-products/' +
-                   productInfo.productId.toString() + '/');
-          } else {
-            url = ('/payments/' + origin + '/in-app/' +
-                   productInfo.productId.toString() + '/');
-          }
-          settings.log.info(
-            'getting product info at URL', url, 'for receipt type', data.typ);
-
-          api.get(url, function(err, productData) {
+          fetchProductInfo(productInfo.productId,
+                           function(err, newProductInfo) {
             if (err) {
-              settings.log.error('Error getting product info from receipt:',
-                                 err);
               return onRestore(err, productInfo);
             }
-
-            var newProductInfo = productInfoFromApi(productData);
             return onRestore(null, newProductInfo);
+          }, {
+            // If this is a test receipt, only fetch stub products.
+            fetchStubs: data.typ === 'test-receipt',
+            api: api
           });
 
         } else {
@@ -314,6 +316,38 @@
       });
     });
   };
+
+  //
+  // private functions:
+  //
+
+  function fetchProductInfo(productId, onFetch, opt) {
+    opt = opt || {};
+    if (typeof opt.fetchStubs === 'undefined') {
+      opt.fetchStubs = false;
+    }
+    if (!opt.api) {
+      opt.api = new API(settings.apiUrlBase);
+    }
+    var origin = encodeURIComponent(settings.appSelf.origin);
+    var url;
+
+    if (opt.fetchStubs) {
+      url = '/payments/stub-in-app-products/' + productId.toString() + '/';
+    } else {
+      url = '/payments/' + origin + '/in-app/' + productId.toString() + '/';
+    }
+    settings.log.info(
+      'fetching product info at URL', url, 'fetching stubs?', opt.fetchStubs);
+
+    opt.api.get(url, function(err, productData) {
+      if (err) {
+        settings.log.error('Error fetching product info', err);
+        return onFetch(err, {productId: productId});
+      }
+      onFetch(null, productInfoFromApi(productData));
+    });
+  }
 
 
   function verifyReceiptJwt(receipt, onVerify) {
@@ -394,7 +428,7 @@
       params[parts[0]] = decodeURIComponent(parts[1]);
     });
 
-    productInfo.productId = parseInt(params.inapp_id, 10);
+    productInfo.productId = params.inapp_id;
 
     if (!productInfo.productId) {
       settings.log.error('Could not find productId in storedata:',
@@ -528,14 +562,25 @@
   }
 
 
-  function onTransaction(err, onPurchase, data, info) {
+  function onTransaction(err, onPurchase, data, productInfo) {
     if (err) {
-      return onPurchase(err, info);
+      return onPurchase(err, productInfo);
     }
     settings.log.info('received completed transaction:', data);
 
     addReceipt(data.receipt, function(err) {
-      onPurchase(err, info);
+      if (err) {
+        return onPurchase(err, productInfo);
+      }
+      fetchProductInfo(productInfo.productId, function(err, fullProductInfo) {
+        if (err) {
+          return onPurchase(err, fullProductInfo);
+        }
+        onPurchase(null, fullProductInfo);
+      }, {
+        // If this is a purchase for fake products, only fetch stub products.
+        fetchStubs: settings.fakeProducts
+      });
     });
   }
 
@@ -671,7 +716,14 @@
     if (opt.contentType) {
       defaultHeaders['Content-Type'] = opt.contentType;
     }
-    opt.headers = opt.headers || defaultHeaders;
+
+    opt.headers = opt.headers || {};
+    for (var h in defaultHeaders) {
+      if (!(h in opt.headers)) {
+        opt.headers[h] = defaultHeaders[h];
+      }
+    }
+    opt.headers['x-fxpay-version'] = exports.__version__;
 
     var log = this.log;
     var api = this;

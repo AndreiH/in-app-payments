@@ -2,7 +2,7 @@
   "type": "privileged",
   "version": "1.0",
   "name": "In-App-Payments-TEST",
-  "origin": "app://my-app.com",
+  "origin": "app://in-app-payments.allizom.org",
   "description": "In-App-Payments-TEST",
   "developer": {
     "name": "Andrei"

@@ -11,6 +11,7 @@ $(function() {
     fxpay.getProducts(function(error, products) {
       if (error) {
         console.error('Error getting products:', error);
+        return showError(error);
       }
       products.forEach(function(productInfo) {
         console.info('Got product:', productInfo);
@@ -19,6 +20,11 @@ $(function() {
       });
     });
   }
+
+  function showError(msg) {
+	    console.error(msg);
+	    $('#error').text(msg);
+	  }
 
   function addProduct(parent, prodID, prodData, i) {
     i = i || {showBuy: true};
@@ -37,8 +43,9 @@ $(function() {
     var prod = $(this).data('product');
     fxpay.purchase(id, function(error, info) {
       if (error) {
-        console.error('error purchasing product', info.productId,
+        console.error('Error purchasing product', info.productId,
                       'message:', error);
+        return showError(error);
       }
     });
   });
@@ -47,7 +54,8 @@ $(function() {
 
   fxpay.init({
     onerror: function(error) {
-      console.error('error during initialization:', error);
+      console.error('Error during initialization:', error);
+      return showError(error);
     },
     oninit: function() {
       console.log('fxPay initialized without errors');
