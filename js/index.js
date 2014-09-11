@@ -7,6 +7,7 @@ $(function() {
 
     catalog = {};
     itemslist.empty();
+    clearPurchases();
 
     fxpay.getProducts(function(error, products) {
       if (error) {
@@ -26,6 +27,11 @@ $(function() {
 	    $('#error').text(msg);
 	  }
 
+  function showStatus(msg) {
+	    console.log(msg);
+	    $('#log').text(msg);
+	  }
+  
   function addProduct(parent, prodID, prodData, i) {
     i = i || {showBuy: true};
     var li = $('<li></li>', {class: 'item'});
@@ -39,16 +45,31 @@ $(function() {
   }
 
   $('ul').on('click', '.item button', function() {
-    var id = $(this).data('productId');
-    var prod = $(this).data('product');
-    fxpay.purchase(id, function(error, info) {
-      if (error) {
-        console.error('Error purchasing product', info.productId,
-                      'message:', error);
-        return showError(error);
-      }
-    });
-  });
+	    var prod = $(this).data('product');
+
+	    showStatus('Purchasing', prod.name, prod.productId);
+
+	    fxpay.purchase(prod.productId, function(err, info) {
+	      if (err) {
+	        console.error('Error purchasing product', info.productId,
+	                      'message:', err);
+	        return showError(err);
+	      }
+	      console.log('Item:', info.productId, info, 'purchased');
+	      itemBought(info);
+	    });
+	  });
+
+  function itemBought(productInfo) {
+	   $('#bought ul li.placeholder').hide();
+	   addProduct($('#bought ul'), productInfo, {showBuy: false});
+	   showStatus('Item bought', productInfo);
+	  }
+
+  function clearPurchases() {
+	    $('#bought ul li:not(.placeholder)').remove();
+	    $('#bought ul li.placeholder').show();
+	  }
 
   fxpay.configure({fakeProducts: true});
 
@@ -57,9 +78,10 @@ $(function() {
       console.error('Error during initialization:', error);
       return showError(error);
     },
-    oninit: function() {
-      console.log('fxPay initialized without errors');
+    oninit: function(msg) {
+      showStatus('fxPay initialized without errors', msg);
       initApp();
+      showStatus(msg);
     },
     onrestore: function(error, info) {
       if (error) {

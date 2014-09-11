@@ -20,6 +20,12 @@ a, button {
     color: red;
 }
 
+#log {
+	text-align: center;
+    font-size: 2.0em;
+    color: green;
+}
+
 .item {
     text-align: left;
     padding: 1em;
