@@ -36,12 +36,14 @@ $(function() {
     i = i || {showBuy: true};
     var li = $('<li></li>', {class: 'item'});
 
-    if (i.showBuy) {
-      li.append($('<button>Buy item!</button>').data({productId: prodID,
-                                                product: prodData}));
-    }
     li.append($('<h4>' + prodData.name + '</h4>'));
     parent.append(li);
+    li.append($('<img src=' + prodData.smallImageUrl + '/>'));
+    parent.append(li);
+    if (i.showBuy) {
+        li.append($('<button>Buy item!</button>').data({productId: prodID,
+                                                  product: prodData}));
+      }
   }
 
   $('ul').on('click', '.item button', function() {
