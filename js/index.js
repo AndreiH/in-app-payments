@@ -71,7 +71,13 @@ $(function() {
 	    $('#bought ul li.placeholder').show();
 	  }
 
-  fxpay.configure({fakeProducts: true});
+  fxpay.configure({
+	  apiUrlBase: [
+	      'https://marketplace.allizom.org',
+	    ]
+	  });
+
+  fxpay.configure({fakeProducts: false});
 
   fxpay.init({
     onerror: function(error) {
