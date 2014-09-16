@@ -84,6 +84,7 @@ $(function() {
         console.error('error restoring product', info.productId,
                       'message:', error);
       }
+      itemBought(info);
     }
   });
 });
