@@ -33,7 +33,7 @@ $(function() {
 	    i = i || {showBuy: true};
 	    var li = $('<li></li>', {class: 'item'});
 
-	    li.append($('<h4>' + prodData.name + '</h4>'));
+	    li.append($('<h4>' + encodeHtmlEntities(prodData.name) + '</h4>'));
 	    parent.append(li);
 	    li.append($('<img src=' + prodData.smallImageUrl + '/>'));
 	    parent.append(li);
@@ -41,6 +41,12 @@ $(function() {
 	    if (i.showBuy) {
 	      li.append($('<button>Buy item!</button>').data({product: prodData}));
 	    }
+	  }
+
+  function encodeHtmlEntities(str) {
+	    return str.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+	      return '&#' + i.charCodeAt(0) + ';';
+	    });
 	  }
 
   $('ul').on('click', '.item button', function() {
