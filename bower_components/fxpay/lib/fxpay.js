@@ -1,7 +1,7 @@
 (function(exports) {
   "use strict";
 
-  var pkgInfo = {"version": "0.0.3"};  // this is updated by `grunt bump`
+  var pkgInfo = {"version": "0.0.4"};  // this is updated by `grunt bump`
   exports.__version__ = pkgInfo.version;
 
   var settings;
@@ -15,6 +15,7 @@
     apiVersionPrefix: '/api/v1',
     // When truthy, this will override the API object's default.
     apiTimeoutMs: null,
+    // When true, work with fake products and test receipts.
     fakeProducts: false,
     // This object is used for all logging.
     log: window.console || {
@@ -229,7 +230,7 @@
     } else {
       settings.log.info('about to fetch real products for app',
                         origin);
-      url = '/payments/' + origin + '/in-app/';
+      url = '/payments/' + origin + '/in-app/?active=1';
     }
 
     api.get(url, function(err, result) {

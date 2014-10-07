@@ -31,6 +31,9 @@ your ``$PATH``::
 
 This is pretty standard for any Node project so you you might already have it.
 
+To test that you have your path set up, type ``which grunt`` and make
+sure you see a path to the executable.
+
 Running Tests
 ~~~~~~~~~~~~~
 
@@ -78,6 +81,10 @@ release like ``git tag 0.0.1``.
 
 Changelog
 =========
+
+**0.0.4** (2014-09-17)
+
+* Only ask for active products from the marketplace.
 
 **0.0.3** (2014-09-03)
 

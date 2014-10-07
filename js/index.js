@@ -12,6 +12,7 @@ $(function() {
         console.error('Error getting products:', error);
         return showError(error);
       }
+      products.sort();
       products.forEach(function(productInfo) {
         console.info('Got product:', productInfo);
         addProduct(itemslist, productInfo);
