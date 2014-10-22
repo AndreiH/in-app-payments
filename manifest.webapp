@@ -1,6 +1,6 @@
 {
   "type": "privileged",
-  "version": "1.2",
+  "version": "1.3",
   "name": "In-App-Payments-TEST",
   "origin": "app://my-app.com",
   "description": "In-App-Payments-TEST",
