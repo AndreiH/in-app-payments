@@ -1,11 +1,34 @@
 $(function() {
   var apiUrlBase;
 
+  var apiUrls = {
+		    prod: 'https://marketplace.firefox.com',
+		    dev: 'https://marketplace-dev.allizom.org',
+		    stage: 'https://marketplace.allizom.org',
+		    alt: 'https://payments-alt.allizom.org',
+		    local: 'http://fireplace.loc',
+		  };
+
   function initApp(env) {
     var itemslist = $('#items ul');
+    if (!env) {
+       env = $('#server option:selected').val();
+    }
+    apiUrlBase = apiUrls[env];
+    if (!apiUrlBase) {
+        throw new Error('unknown API env: ' + env);
+    }
+    console.log('setting API to', apiUrlBase);
 
+    fxpay.configure({
+       apiUrlBase: apiUrlBase
+    });
+
+    clearError();
+    clearitemsBought();
     itemslist.empty();
 
+    console.log('getting items from', apiUrlBase);
 
     fxpay.getProducts(function(error, products) {
       if (error) {
@@ -19,6 +42,15 @@ $(function() {
       });
     });
   }
+
+  function clearError() {
+	    $('#error').text('');
+	  }
+
+  function clearitemsBought() {
+	    $('#bought ul li:not(.placeholder)').remove();
+	    $('#bought ul li.placeholder').show();
+	  }
 
   function showError(msg) {
 	    console.error(msg);
@@ -72,9 +104,21 @@ $(function() {
 	   showStatus('Item bought', productInfo);
 	  }
 
-  fxpay.configure({fakeProducts: false,
-	  apiUrlBase: 'https://marketplace.allizom.org',
-	  receiptCheckSites: 'https://marketplace.allizom.org'});
+  $('#server').change(function(evt) {
+	    initApp();
+	  });
+
+  fxpay.configure({
+	    receiptCheckSites: [
+	      'https://receiptcheck.marketplace.firefox.com',
+	      'https://marketplace.firefox.com',
+	      'https://receiptcheck-dev.allizom.org',
+	      'https://marketplace-dev.allizom.org',
+	      'https://receiptcheck-payments-alt.allizom.org',
+	      'https://payments-alt.allizom.org',
+	      'http://fireplace.loc',
+	    ]
+	  });
 
   fxpay.init({
     onerror: function(error) {
