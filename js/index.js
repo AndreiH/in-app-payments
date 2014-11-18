@@ -109,16 +109,17 @@ $(function() {
 	  });
 
   fxpay.configure({
-	    receiptCheckSites: [
-	      'https://receiptcheck.marketplace.firefox.com',
-	      'https://marketplace.firefox.com',
-	      'https://receiptcheck-dev.allizom.org',
-	      'https://marketplace-dev.allizom.org',
-	      'https://receiptcheck-payments-alt.allizom.org',
-	      'https://payments-alt.allizom.org',
-	      'http://fireplace.loc',
-	    ]
-	  });
+	  receiptCheckSites: [
+	                      'https://receiptcheck.marketplace.firefox.com',
+	                      'https://receiptcheck-marketplace.allizom.org',
+	                      'https://marketplace.firefox.com',
+	                      'https://receiptcheck-dev.allizom.org',
+	                      'https://marketplace-dev.allizom.org',
+	                      'https://receiptcheck-payments-alt.allizom.org',
+	                      'https://payments-alt.allizom.org',
+	                      'http://fireplace.loc',
+	                      ]
+  	});
 
   fxpay.init({
     onerror: function(error) {
