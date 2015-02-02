@@ -111,6 +111,7 @@ $(function() {
   fxpay.configure({
 	  receiptCheckSites: [
 	                      'https://receiptcheck.marketplace.firefox.com',
+	                      'https://receiptcheck-marketplace-dev.allizom.org',
 	                      'https://receiptcheck-marketplace.allizom.org',
 	                      'https://marketplace.firefox.com',
 	                      'https://receiptcheck-dev.allizom.org',
